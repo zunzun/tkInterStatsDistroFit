@@ -167,6 +167,7 @@ class InterfaceFrame(tk.Frame):
         
         if type(data) == type(''): # text is used for status box display to user
             self.statusBox.text.insert(tk.END, data + '\n')
+            self.statusBox.text.see(tk.END) # ensure new text is visible to user
         else: # the queue data is now the fitting results.
             # write the fitted results to a pickle file.  This
             # allows the possibility of archiving the fitting results
