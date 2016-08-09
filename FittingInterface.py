@@ -1,5 +1,5 @@
 import os, sys, io, queue, pickle, time, inspect
-import scipy, scipy.stats
+import scipy.stats
 import pyeq3
 
 import matplotlib # ensure this dependency imports for later use in fitting results
@@ -9,7 +9,7 @@ from tkinter import messagebox as tk_mbox
 import tkinter.scrolledtext as tk_stxt
 
 import ExampleData
-#import FittingThread
+import FittingThread
 
 
 class InterfaceFrame(tk.Frame):
@@ -88,7 +88,7 @@ class InterfaceFrame(tk.Frame):
         row, col = (8, 1)
         f = tk.Frame(self)
         f.grid(column=col, row=row)        
-        rb = tk.Radiobutton(f, text='Negative Log Likelihood', variable=self.sortOrderStringVar, value='NegLogLikelihood')
+        rb = tk.Radiobutton(f, text='Negative Log Likelihood', variable=self.sortOrderStringVar, value='nnlf')
         rb.pack(anchor=tk.W)
         rb.select() # default initial selection
         rb = tk.Radiobutton(f, text='Akaike Information Criterion (AIC)', variable=self.sortOrderStringVar, value='AIC')
@@ -103,8 +103,8 @@ class InterfaceFrame(tk.Frame):
 
         # ROW 10 - fitting button
         row, col = (10, 1)
-        self.buttonFit_1D = tk.Button(self, text="Fit Statistical Distributions", command=self.OnFitDistributions)
-        self.buttonFit_1D.grid(column=col, row=row)
+        self.buttonFitDistributions = tk.Button(self, text="Fit Statistical Distributions", command=self.OnFitDistributions)
+        self.buttonFitDistributions.grid(column=col, row=row)
     
         # ROW 11 - empty label as visual buffer
         row, col = (11, 0)
@@ -127,7 +127,8 @@ class InterfaceFrame(tk.Frame):
         self.equationBase = pyeq3.IModel.IModel()
         self.equationBase._dimensionality = 1
         pyeq3.dataConvertorService().ConvertAndSortColumnarASCII(textData, self.equationBase, False)
-        dataCount = len(self.equationBase.dataCache.allDataCacheDictionary['IndependentData'])
+        rawData = self.equationBase.dataCache.allDataCacheDictionary['IndependentData'][0]
+        dataCount = len(rawData)
         if dataCount < 2:
             tk_mbox.showerror("Error", "A minimum of two data points is needed, you have supplied " + repr(dataCount) + ".")
             return
@@ -136,7 +137,7 @@ class InterfaceFrame(tk.Frame):
         sortOrderString = self.sortOrderStringVar.get()
         
         # Now the status dialog is used. Disable fitting button until thread completes
-        self.buttonFit_1D.config(state=tk.DISABLED)
+        self.buttonFitDistributions.config(state=tk.DISABLED)
         
         # create simple top-level text dialog to display status as fitting progresses
         # when the fitting thread completes, it will close the status box
@@ -155,7 +156,7 @@ class InterfaceFrame(tk.Frame):
 
         # thread will automatically start to run
         # "status update" handler will re-enable fitting button
-        #self.fittingWorkerThread = FittingThread.FittingThread(self, self.equation)
+        self.fittingWorkerThread = FittingThread.FittingThread(self, rawData, selectedDistributions, sortOrderString)
 
 
     # When "status_update" event is generated, get
@@ -169,9 +170,9 @@ class InterfaceFrame(tk.Frame):
         else: # the queue data is now the fitting results.
             # write the fitted results to a pickle file.  This
             # allows the possibility of archiving the fitting results
-            pickledFittingResultsFile = open("pickledFittingResultsFile", "wb")
-            pickle.dump(data, pickledFittingResultsFile)
-            pickledFittingResultsFile.close()
+            pickledResultsFile = open("pickledResultsFile", "wb")
+            pickle.dump(data, pickledResultsFile)
+            pickledResultsFile.close()
     
             # view fitting results
             # allow multiple result windows to open for comparisons
@@ -181,7 +182,7 @@ class InterfaceFrame(tk.Frame):
             time.sleep(5.0)
 
             # re-enable fitting button
-            self.buttonFit_1D.config(state=tk.NORMAL)
+            self.buttonFitDistributions.config(state=tk.NORMAL)
         
             # destroy the now-unused status box
             self.statusBox.destroy()
