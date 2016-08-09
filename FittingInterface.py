@@ -132,10 +132,10 @@ class InterfaceFrame(tk.Frame):
             tk_mbox.showerror("Error", "A minimum of two data points is needed, you have supplied " + repr(dataCount) + ".")
             return
                 
-        # then sort order for results
+        # the sort order for results
         sortOrderString = self.sortOrderStringVar.get()
         
-        # Now the status dialog is used. Disable fitting buttons until thread completes
+        # Now the status dialog is used. Disable fitting button until thread completes
         self.buttonFit_1D.config(state=tk.DISABLED)
         
         # create simple top-level text dialog to display status as fitting progresses
@@ -154,7 +154,7 @@ class InterfaceFrame(tk.Frame):
         self.statusBox.geometry('{}x{}+{}+{}'.format(width, height, x, y))        
 
         # thread will automatically start to run
-        # "status update" handler will re-enable buttons
+        # "status update" handler will re-enable fitting button
         #self.fittingWorkerThread = FittingThread.FittingThread(self, self.equation)
 
 
@@ -166,12 +166,12 @@ class InterfaceFrame(tk.Frame):
         
         if type(data) == type(''): # text is used for status box display to user
             self.statusBox.text.insert(tk.END, data + '\n')
-        else: # the queue data is now the fitted equation.
-            # write the fitted equation to a pickle file.  This
-            # allows the possibility of archiving the fitted equations
-            pickledEquationFile = open("pickledEquationFile", "wb")
-            pickle.dump(data, pickledEquationFile)
-            pickledEquationFile.close()
+        else: # the queue data is now the fitting results.
+            # write the fitted results to a pickle file.  This
+            # allows the possibility of archiving the fitting results
+            pickledFittingResultsFile = open("pickledFittingResultsFile", "wb")
+            pickle.dump(data, pickledFittingResultsFile)
+            pickledFittingResultsFile.close()
     
             # view fitting results
             # allow multiple result windows to open for comparisons
@@ -180,7 +180,7 @@ class InterfaceFrame(tk.Frame):
             # give the system a few seconds to start the reporting application
             time.sleep(5.0)
 
-            # re-enable fitting buttons
+            # re-enable fitting button
             self.buttonFit_1D.config(state=tk.NORMAL)
         
             # destroy the now-unused status box
@@ -192,7 +192,7 @@ if __name__ == "__main__":
     root = tk.Tk()
     interface = InterfaceFrame(root)
     interface.pack()
-    root.title("tkinterDistributionFit - Fitting Interface")
+    root.title("tkInterStatsDistroFit - Fitting Interface")
     
     # manually center the application window on the user display
     root.update_idletasks()

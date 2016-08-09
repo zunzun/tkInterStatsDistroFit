@@ -1,3 +1,5 @@
+IN PROGRESS
+
 Welcome to tkInterStatsDistroFit, an example of creating
 a cross-platform statistical dostribution fitting application 
 using tkinter and the pyeq3 fitting library.
