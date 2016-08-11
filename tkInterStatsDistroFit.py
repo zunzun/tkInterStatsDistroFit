@@ -5,6 +5,7 @@ import FittingInterface
 # your own tkinter programs as shown here
 root = tk.Tk()
 interface = FittingInterface.InterfaceFrame(root)
+
 interface.pack()
 root.title("tkinterDistributionFit - Fitting Interface")
 

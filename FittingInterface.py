@@ -127,8 +127,8 @@ class InterfaceFrame(tk.Frame):
         self.equationBase = pyeq3.IModel.IModel()
         self.equationBase._dimensionality = 1
         pyeq3.dataConvertorService().ConvertAndSortColumnarASCII(textData, self.equationBase, False)
-        rawData = self.equationBase.dataCache.allDataCacheDictionary['IndependentData'][0]
-        dataCount = len(rawData)
+        self.rawData = self.equationBase.dataCache.allDataCacheDictionary['IndependentData'][0]
+        dataCount = len(self.rawData)
         if dataCount < 2:
             tk_mbox.showerror("Error", "A minimum of two data points is needed, you have supplied " + repr(dataCount) + ".")
             return
@@ -156,24 +156,24 @@ class InterfaceFrame(tk.Frame):
 
         # thread will automatically start to run
         # "status update" handler will re-enable fitting button
-        self.fittingWorkerThread = FittingThread.FittingThread(self, rawData, selectedDistributions, sortOrderString)
+        self.fittingWorkerThread = FittingThread.FittingThread(self, self.rawData, selectedDistributions, sortOrderString)
 
 
     # When "status_update" event is generated, get
     # text data from queue and display it to the user.
     # If the queue data is not text, it is the fitted equation.
     def StatusUpdateHandler(self, *args):
-        data = self.queue.get_nowait()
+        queueData = self.queue.get_nowait()
         
-        if type(data) == type(''): # text is used for status box display to user
-            self.statusBox.text.insert(tk.END, data + '\n')
+        if type(queueData) == type(''): # text is used for status box display to user
+            self.statusBox.text.insert(tk.END, queueData + '\n')
             self.statusBox.text.see(tk.END) # ensure new text is visible to user
         else: # the queue data is now the fitting results.
             # write the fitted results to a pickle file.  This
             # allows the possibility of archiving the fitting results
-            pickledResultsFile = open("pickledResultsFile", "wb")
-            pickle.dump(data, pickledResultsFile)
-            pickledResultsFile.close()
+            pickledStatsDistroFile = open("pickledStatsDistroFile", "wb")
+            pickle.dump([self.rawData, queueData], pickledStatsDistroFile)
+            pickledStatsDistroFile.close()
     
             # view fitting results
             # allow multiple result windows to open for comparisons
