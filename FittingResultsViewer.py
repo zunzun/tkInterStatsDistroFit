@@ -63,10 +63,11 @@ class ResultsFrame(tk.Frame):
             except:
                 notes = ''
                 
+            URL = 'scipy URL is http://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.' + distro[1]['distributionName'] + '.html\n\n'
             if notes:
-                distro[1]['scipyInfo'] = notes
+                distro[1]['scipyInfo'] = URL + notes
             else:
-                distro[1]['scipyInfo'] = 'No additional information available from scipy.'
+                distro[1]['scipyInfo'] = URL + 'No additional information available from scipy.'
 
         # a combo box for user selection of fitted distributions
         distroStringVar = tk.StringVar()
