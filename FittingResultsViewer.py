@@ -82,8 +82,11 @@ class ResultsFrame(tk.Frame):
         nbGraphReports.pack()
         topLevelNotebook.add(nbGraphReports, text='Graph Reports')
 
-        #report = IndividualReports.AbsoluteErrorHistogram(nbGraphReports, equation)
-        #nbGraphReports.add(report, text="Absolute Error Histogram")
+        report = IndividualReports.StatsDistroHistogram(nbGraphReports, rawData, distro)
+        nbGraphReports.add(report, text="Statistical Distribution Histogram")
+
+        report = IndividualReports.DataHistogram(nbGraphReports, rawData)
+        nbGraphReports.add(report, text="Data Histogram")
 
         # the "text reports" notebook tab
         nbTextReports = ttk.Notebook(topLevelNotebook)
