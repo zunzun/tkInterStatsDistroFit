@@ -88,7 +88,7 @@ class InterfaceFrame(tk.Frame):
         row, col = (8, 1)
         f = tk.Frame(self)
         f.grid(column=col, row=row)        
-        rb = tk.Radiobutton(f, text='Negative Log Likelihood', variable=self.sortOrderStringVar, value='nnlf')
+        rb = tk.Radiobutton(f, text='Negative Log Likelihood (nnlf)', variable=self.sortOrderStringVar, value='nnlf')
         rb.pack(anchor=tk.W)
         rb.select() # default initial selection
         rb = tk.Radiobutton(f, text='Akaike Information Criterion (AIC)', variable=self.sortOrderStringVar, value='AIC')
@@ -169,6 +169,18 @@ class InterfaceFrame(tk.Frame):
             self.statusBox.text.insert(tk.END, queueData + '\n')
             self.statusBox.text.see(tk.END) # ensure new text is visible to user
         else: # the queue data is now the fitting results.
+            
+            if not queueData:
+                # destroy the now-unused status box
+                self.statusBox.destroy()
+                
+                tk_mbox.showerror("Warning", "No distribution fots were found.")
+
+                # re-enable fitting button
+                self.buttonFitDistributions.config(state=tk.NORMAL)
+            
+                return
+
             # write the fitted results to a pickle file.  This
             # allows the possibility of archiving the fitting results
             pickledStatsDistroFile = open("pickledStatsDistroFile", "wb")

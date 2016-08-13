@@ -32,6 +32,8 @@ class FittingThread(threading.Thread):
             # pyeq3 returns zero here if any errors or exceptions
                 result = pyeq3.Services.SolverService.SolverService().SolveStatisticalDistribution(distributionName, self.rawData, self.sortOrderString)
                 if result:
+                    if result[1]['nnlf'] <= 0.0: # problem in calculation
+                        continue
                     resultList.append(result)
 
         statusString = 'Fitting complete, creating graphs and reports...'

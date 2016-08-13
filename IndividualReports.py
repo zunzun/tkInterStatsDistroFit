@@ -22,12 +22,18 @@ graphHeight = 600 # units are pixels
 
 
 
-def ParameterListing(parent, distro):
+def ParametersAndFitStatistics(parent, distro):
     scrolledText = tk_stxt.ScrolledText(parent, width=textboxWidth, height=textboxHeight, wrap=tk.NONE)
     scrolledText.insert(tk.END, 'Parameters:\n')
     
     for parmIndex in range(len(distro[1]['fittedParameters'])):
         scrolledText.insert(tk.END, '    ' + distro[1]['parameterNames'][parmIndex] + ' = %-.16E' % (distro[1]['fittedParameters'][parmIndex]) + '\n')
+
+    scrolledText.insert(tk.END, '\n\nFit Statistics:\n')
+    scrolledText.insert(tk.END, '       nnlf = %-.16E' % (distro[1]['nnlf']) + '\n')
+    scrolledText.insert(tk.END, '        AIC = %-.16E' % (distro[1]['AIC']) + '\n')
+    scrolledText.insert(tk.END, '    AICc_BA = %-.16E' % (distro[1]['AICc_BA']) + '\n')
+
     return scrolledText
 
 
@@ -153,7 +159,7 @@ def StatsDistroHistogram(parent, rawData, distro):
     if ylim[1] == max(n):
         axes.set_ylim(0.0, ylim[1] + 1)
 
-    axes.set_title('Distribution  Histogram') # add a title
+    axes.set_title('Distribution  Histogram for ' + distro[1]['distributionName']) # add a title
     axes.set_ylabel("Normalized Frequency") # Y axis label is frequency
 
     canvas.show()
