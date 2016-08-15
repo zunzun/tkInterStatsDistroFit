@@ -54,19 +54,10 @@ class ResultsFrame(tk.Frame):
             distro[1]['parameterNames'] = parameterNames
 
             # any additional info from scipy?
-            try:
-                n = item.__doc__.find('Notes\n')
-                e = item.__doc__.find('Examples\n')
-                
-                notes =  item.__doc__[n:e]
-                notes = notes[notes.find('-\n') + 2:].replace('::', ':').strip()  
-            except:
-                notes = ''
-                
             URL = 'scipy URL is http://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.' + distro[1]['distributionName'] + '.html\n\n'
-            if notes:
-                distro[1]['scipyInfo'] = URL + notes
-            else:
+            try:
+                distro[1]['scipyInfo'] = URL + item.__doc__
+            except:
                 distro[1]['scipyInfo'] = URL + 'No additional information available from scipy.'
 
         # a combo box for user selection of fitted distributions
