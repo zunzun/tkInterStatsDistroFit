@@ -174,7 +174,7 @@ class InterfaceFrame(tk.Frame):
                 # destroy the now-unused status box
                 self.statusBox.destroy()
                 
-                tk_mbox.showerror("Warning", "No distribution fots were found.")
+                tk_mbox.showerror("Warning", "No selected distribution fits could be made to this data.")
 
                 # re-enable fitting button
                 self.buttonFitDistributions.config(state=tk.NORMAL)
