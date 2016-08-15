@@ -104,6 +104,19 @@ class ResultsFrame(tk.Frame):
         report = IndividualReports.ScipyInfoReport(self.nbTextReports, self.distroList[0])
         self.nbTextReports.add(report, text="Scipy Info")
 
+        # the "additional information" notebook tab
+        nbAdditionalInfo = ttk.Notebook(topLevelNotebook)
+        nbAdditionalInfo.pack()
+        topLevelNotebook.add(nbAdditionalInfo, text='Additional Information')
+                
+        scrolledText = tk_stxt.ScrolledText(nbAdditionalInfo, width=IndividualReports.textboxWidth, height=IndividualReports.textboxHeight, wrap=tk.WORD)
+        nbAdditionalInfo.add(scrolledText, text="Author History")
+        scrolledText.insert(tk.END, AdditionalInfo.author)
+
+        scrolledText = tk_stxt.ScrolledText(nbAdditionalInfo, width=IndividualReports.textboxWidth, height=IndividualReports.textboxHeight, wrap=tk.WORD)
+        nbAdditionalInfo.add(scrolledText, text="Web Links")
+        scrolledText.insert(tk.END, AdditionalInfo.links)
+
 
     def updateStatisticalDistributionNotebookTabs(self, listIndex):
         # create new graph
