@@ -125,7 +125,7 @@ def DataHistogram(parent, rawData):
 
     canvas.show()
     plt.close('all') # clean up after using pyplot or else thaere can be memory and process problems
-    return canvas.get_tk_widget()
+    return [canvas.get_tk_widget(), f]
 
 
 def StatsDistroHistogram(parent, rawData, distro):
@@ -164,4 +164,4 @@ def StatsDistroHistogram(parent, rawData, distro):
 
     canvas.show()
     plt.close('all') # clean up after using pyplot or else thaere can be memory and process problems
-    return canvas.get_tk_widget()
+    return [canvas.get_tk_widget(), f]

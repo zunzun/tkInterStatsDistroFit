@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import ttk as ttk
 from tkinter import messagebox as tk_mbox
 import tkinter.scrolledtext as tk_stxt
+from tkinter import filedialog as filedialog
 
 import IndividualReports
 import AdditionalInfo
@@ -16,6 +17,10 @@ class ResultsFrame(tk.Frame):
     
     def __init__(self, parent, pickledStatsDistroFile):
         tk.Frame.__init__(self, parent)
+
+        self.graphReportsListForPDF = []
+        self.textReportsListForPDF = []
+        self.selectedDistroIndex = 0
         
         # first, load the fitted distributions
         resultsFile = open(pickledStatsDistroFile, 'rb')
@@ -26,7 +31,7 @@ class ResultsFrame(tk.Frame):
         self.distroList.sort(key=lambda item: item[0])
 
         # now dig out "long names" for user select in a combobox, and
-        # initialize "parameter names" and and additional scipy onformation
+        # then initialize "parameter names" and and additional scipy information
         longnameList = []
         maxWidth = 0
         rank = 1
@@ -76,10 +81,12 @@ class ResultsFrame(tk.Frame):
         topLevelNotebook.add(self.nbGraphReports, text='Graph Reports')
 
         report = IndividualReports.StatsDistroHistogram(self.nbGraphReports, self.rawData, self.distroList[0])
-        self.nbGraphReports.add(report, text="Statistical Distribution Histogram")
+        self.graphReportsListForPDF.append(report[1])
+        self.nbGraphReports.add(report[0], text="Statistical Distribution Histogram")
         
         report = IndividualReports.DataHistogram(self.nbGraphReports, self.rawData)
-        self.nbGraphReports.add(report, text="Data Histogram")
+        self.graphReportsListForPDF.append(report[1])
+        self.nbGraphReports.add(report[0], text="Data Histogram")
 
         # the "text reports" notebook tab
         self.nbTextReports = ttk.Notebook(topLevelNotebook)
@@ -87,13 +94,19 @@ class ResultsFrame(tk.Frame):
         topLevelNotebook.add(self.nbTextReports, text='Text Reports')
                 
         report = IndividualReports.ParametersAndFitStatistics(self.nbTextReports, self.distroList[0])
-        self.nbTextReports.add(report, text="Parameters and Fit Statistics")
+        reportTitle = "Parameters and Fit Statistics"
+        self.nbTextReports.add(report, text=reportTitle)
+        self.textReportsListForPDF.append([report.get("1.0", tk.END), reportTitle])
 
         report = IndividualReports.DataArrayStatisticsReport(self.nbTextReports, "Data Statistics", self.rawData)
-        self.nbTextReports.add(report, text="Data Statistics")
+        reportTitle = "Data Statistics"
+        self.nbTextReports.add(report, text=reportTitle)
+        self.textReportsListForPDF.append([report.get("1.0", tk.END), reportTitle])
 
         report = IndividualReports.ScipyInfoReport(self.nbTextReports, self.distroList[0])
-        self.nbTextReports.add(report, text="Scipy Info")
+        reportTitle = "Scipy Info"
+        self.nbTextReports.add(report, text=reportTitle)
+        self.textReportsListForPDF.append([report.get("1.0", tk.END), reportTitle])
 
         # the "additional information" notebook tab
         nbAdditionalInfo = ttk.Notebook(topLevelNotebook)
@@ -108,33 +121,78 @@ class ResultsFrame(tk.Frame):
         nbAdditionalInfo.add(scrolledText, text="Web Links")
         scrolledText.insert(tk.END, AdditionalInfo.links)
 
+        # the "Save To PDF" tab
+        fsaveFrame = tk.Frame(self)
+            
+        # this label is only for visual spacing
+        l = tk.Label(fsaveFrame, text="\n\n\n")
+        l.pack()
 
-    def updateStatisticalDistributionNotebookTabs(self, listIndex):
+        buttonSavePDF = tk.Button(fsaveFrame, text="Save To PDF", command=self.createPDF, height=0, width=0)
+        buttonSavePDF.pack()
+        topLevelNotebook.add(fsaveFrame, text="Save To PDF File")
+
+
+    def updateStatisticalDistributionNotebookTabs(self, selectedDistroIndex):
+        self.selectedDistroIndex = selectedDistroIndex
+        
         # create new graph
-        report = IndividualReports.StatsDistroHistogram(self.nbGraphReports, self.rawData, self.distroList[listIndex])
+        report = IndividualReports.StatsDistroHistogram(self.nbGraphReports, self.rawData, self.distroList[selectedDistroIndex])
         
         # replace the existing graph's tab with the new one
+        #use selectedTabIndex to maintain display if currently selected tab
         selectedTabIndex = self.nbGraphReports.index(self.nbGraphReports.select())
         self.nbGraphReports.forget(0)
-        self.nbGraphReports.insert(0, report, text="Statistical Distribution Histogram")
+        self.nbGraphReports.insert(0, report[0], text="Statistical Distribution Histogram")
+        
         self.nbGraphReports.select(selectedTabIndex)
+        
+        # histogram of raw data does not change
+        self.graphReportsListForPDF[0] = report[1]
 
         # replace the existing text info tabs with the new ones
         selectedTabIndex = self.nbTextReports.index(self.nbTextReports.select())
         self.nbTextReports.forget(2)
         self.nbTextReports.forget(0)
-        report = IndividualReports.ParametersAndFitStatistics(self.nbTextReports, self.distroList[listIndex])
+        report = IndividualReports.ParametersAndFitStatistics(self.nbTextReports, self.distroList[selectedDistroIndex])
         self.nbTextReports.insert(0, report, text="Parameters and Fit Statistics")
-
-        report = IndividualReports.ScipyInfoReport(self.nbTextReports, self.distroList[listIndex])
+        self.textReportsListForPDF[0][0] = report.get("1.0", tk.END)
+        
+        # raw data statistics unchanged
+        
+        report = IndividualReports.ScipyInfoReport(self.nbTextReports, self.distroList[selectedDistroIndex])
         self.nbTextReports.add(report, text="Scipy Info")
+        self.textReportsListForPDF[2][0] = report.get("1.0", tk.END)
+        
         self.nbTextReports.select(selectedTabIndex)
-
 
 
     def onComboBoxSelect(self, event):
         self.comboBox.selection_clear() # widget appearance only, does not change selection
         self.updateStatisticalDistributionNotebookTabs(self.comboBox.current())
+
+
+    def createPDF(self):
+        try:
+            import reportlab
+        except:
+            tk_mbox.showerror("Error", "\nCould not import reportlab.\n\nPlease install using the command\n\n'pip3 install reportlab'")
+            return
+
+        # see https://bugs.python.org/issue22810 for the
+        # "alloc: invalid block" error on application close 
+        fName = filedialog.asksaveasfilename(
+                                filetypes =(("PDF Files", "*.pdf"),("All Files","*.*")),
+                                title = "PDF file name"
+                                )
+        if fName:
+            import pdfCode
+            pdfCode.CreatePDF(fName,
+                              self.distroList[self.selectedDistroIndex][1]['longName'],
+                              self.graphReportsListForPDF,
+                              self.textReportsListForPDF
+                              )
+            tk_mbox.showinfo("Success", "\nSuccessfully created PDF file.")
     
 
 
