@@ -1,7 +1,8 @@
 
 exampleData1D = '''
-This data was generated from a
-Rayleigh distribution (5.0, 2.0)
+This data was generated from
+a Rayleigh distribution with
+location = 5.0, scale = 2.0
 
 6.80743717445
 5.73241246041
