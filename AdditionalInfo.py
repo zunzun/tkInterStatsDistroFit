@@ -2,7 +2,7 @@ links = '''
 URL for source code of this computer program:
 https://github.com/zunzun/tkInterStatsDistroFit
 
-URL for web version of this code, which generates PDF files:
+URL for web version of this code:
 https://github.com/zunzun/zunzunsite3
 
 URL for the pyeq3 fitting library, which has hundreds \
